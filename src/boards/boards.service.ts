@@ -1,52 +1,33 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Board, BoardStatus } from './board.model.js';
+import { BoardStatus } from './board.js';
 import { v1 as uuid } from 'uuid';
 import { CreateBoardDto } from './dto/create-board.dto.js';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Board } from './board.entity.js';
+import { boardRepository } from './board.repository.js';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
+  constructor(private boardRepository: boardRepository) {}
 
-  getAllBoards(): Board[] {
-    return this.boards;
+  getAllBoards(): Promise<Board[]> {
+    return this.boardRepository.getAllBoards();
   }
 
-  getBoardById(id: string): Board {
-    const board = this.boards.find((board) => board.id === id);
-    if (!board) {
-      throw new NotFoundException(`Board with id "${id}" not found`);
-    }
-
-    return board;
+  getBoardById(id: number): Promise<Board> {
+    return this.boardRepository.getBoardById(id);
   }
 
-  createBoard(createBoardDto: CreateBoardDto): Board {
-    const { title, description } = createBoardDto;
-
-    const board: Board = {
-      id: uuid(),
-      title,
-      description,
-      status: 'PUBLIC',
-    };
-
-    this.boards.push(board);
-    return board;
+  createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+    return this.boardRepository.createBoard(createBoardDto);
   }
 
-  updateBoardStatusById(id: string, status: BoardStatus): Board | undefined {
-    const board = this.getBoardById(id);
-    board.status = status;
-    return board;
+  updateBoardStatusById(id: number, status: BoardStatus): Promise<Board> {
+    return this.boardRepository.updateBoardById(id, status);
   }
 
-  deleteBoard(id: string): void {
-    const board = this.getBoardById(id);
-
-    if (!board) {
-      throw new NotFoundException(`Board with id "${id}" not found`);
-    }
-
-    this.boards = this.boards.filter((board) => board.id !== id);
+  deleteBoard(id: number): Promise<void> {
+    return this.boardRepository.deleteBoard(id);
   }
 }
