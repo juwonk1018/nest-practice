@@ -5,7 +5,7 @@ export interface Board {
   status: BoardStatus;
 }
 
-const BoardStatus = {
+export const BoardStatus = {
   PUBLIC: 'PUBLIC',
   PRIVATE: 'PRIVATE',
 } as const;
